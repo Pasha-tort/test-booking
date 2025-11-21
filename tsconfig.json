@@ -28,6 +28,8 @@
       "@libs/common/*": ["libs/common/src/*"],
       "@libs/kafka": ["libs/kafka/src"],
       "@libs/kafka/*": ["libs/kafka/src/*"],
+      "@libs/database": ["libs/database/src"],
+      "@libs/database/*": ["libs/database/src/*"],
       "@libs/shared": ["libs/shared/src"],
       "@libs/shared/*": ["libs/shared/src/*"]
     }

@@ -1,4 +1,5 @@
-import { IDatabaseConfig } from "./database-config.interface";
+import { IDatabaseConfig } from './database-config.interface';
+import { IKafkaConfig } from './kafka-config.interface';
 
 export interface IMicroservice {
   readonly swaggerEnable?: boolean;
@@ -6,12 +7,13 @@ export interface IMicroservice {
   readonly url: string;
   readonly port: string;
   readonly database?: IDatabaseConfig;
+  readonly kafka?: IKafkaConfig;
   readonly host?: string;
 }
 
 export interface IMicroservicesConfig {
-  api: IMicroservice;
-  booking: IMicroservice;
+  bookingApi: IMicroservice;
+  bookingWorker: IMicroservice;
 }
 
 export type AppKey = keyof IMicroservicesConfig;

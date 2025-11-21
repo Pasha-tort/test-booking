@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppKey, IMicroservice } from '@libs/configuration/interfaces';
 import { MicroservicesConfig } from '@libs/configuration';
+import { registerAllConsumersKafka } from '@libs/kafka';
 
 class Microservice {
   private appKey: AppKey;
@@ -54,6 +55,7 @@ class Microservice {
       );
       this.app.setGlobalPrefix('api');
 
+      registerAllConsumersKafka(this.app);
       this.setupPipes();
       this.setupInterceptors();
       this.config.swaggerEnable && (await this.setupDocumentation());

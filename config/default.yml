@@ -1,7 +1,7 @@
 microservices:
-  api:
-    url: "http://localhost:3001"
-    port: "3001"
+  booking-api:
+    url: 'http://localhost:3001'
+    port: '3001'
     swaggerEnable: true
     database:
       type: postgres
@@ -10,14 +10,20 @@ microservices:
       username: postgres
       password: L(/;-?"vjnSw+4,J5gVM)W
       database: postgres
+    kafka:
+      clientId: booking-api
+      brokers: ['localhost:9092']
 
-  booking:
-    url: "http://localhost:3002"
-    port: "3002"
-    # database:
-    #   type: postgres
-    #   host: localhost
-    #   port: 5432
-    #   username: postgres
-    #   password: L(/;-?"vjnSw+4,J5gVM)W
-    #   database: postgres
+  booking-worker:
+    url: 'http://localhost:3002'
+    port: '3002'
+    database:
+      type: postgres
+      host: localhost
+      port: 5432
+      username: postgres
+      password: L(/;-?"vjnSw+4,J5gVM)W
+      database: postgres
+    kafka:
+      clientId: booking-worker
+      brokers: ['localhost:9092']
