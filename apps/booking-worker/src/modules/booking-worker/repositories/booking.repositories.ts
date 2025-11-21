@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { BookingEntity } from '../entities';
-import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { BookingEntity } from '@libs/database';
 import { BookingStatusEnum } from '@libs/shared';
 import { CustomError } from '@libs/common';
 
@@ -20,27 +19,7 @@ export class BookingRepository {
     [BookingStatusEnum.REJECTED]: [],
   };
 
-  constructor(
-    @InjectRepository(BookingEntity)
-    private readonly bookingRepository: Repository<BookingEntity>,
-    private readonly dataSource: DataSource,
-  ) {}
-
-  async createBooking({
-    restaurantId,
-    guestCount,
-    date,
-  }: {
-    restaurantId: string;
-    guestCount: number;
-    date: Date;
-  }) {
-    return this.bookingRepository.save({
-      restaurantId,
-      guestCount,
-      date,
-    });
-  }
+  constructor(private readonly dataSource: DataSource) {}
 
   async updateStatusInTransaction({
     bookingId,
@@ -61,9 +40,5 @@ export class BookingRepository {
       booking.status = status;
       return em.save(BookingEntity, booking);
     });
-  }
-
-  async getBookingById(bookingId: string) {
-    return this.bookingRepository.findOneBy({ id: bookingId });
   }
 }

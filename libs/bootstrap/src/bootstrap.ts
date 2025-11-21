@@ -55,7 +55,7 @@ class Microservice {
       );
       this.app.setGlobalPrefix('api');
 
-      registerAllConsumersKafka(this.app);
+      this.config.kafka && registerAllConsumersKafka(this.app);
       this.setupPipes();
       this.setupInterceptors();
       this.config.swaggerEnable && (await this.setupDocumentation());

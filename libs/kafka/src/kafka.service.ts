@@ -5,7 +5,7 @@ import {
   Inject,
   Logger,
 } from '@nestjs/common';
-import { Kafka, Producer } from 'kafkajs';
+import { Kafka, Message, Producer, ProducerRecord } from 'kafkajs';
 import { KAFKA_PROGRAM } from './constants';
 
 @Injectable()
@@ -20,6 +20,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this.producer = this.kafka.producer();
+    await this.producer.connect();
     this.logger.log('[Kafka] Producer connected');
   }
 
@@ -27,10 +28,17 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     await this.producer.disconnect();
   }
 
-  async publish(topic: string, message: any) {
+  async publishMessage<T extends object>(
+    topic: string,
+    { payload, key }: { payload: T; key?: string },
+  ) {
+    const message: Pick<Message, 'value' | 'key'> = {
+      value: JSON.stringify(payload),
+    };
+    if (key) message.key = key;
     await this.producer.send({
       topic,
-      messages: [{ value: JSON.stringify(message) }],
+      messages: [message],
     });
   }
 }

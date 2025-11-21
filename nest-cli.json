@@ -37,23 +37,23 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
-    "booking": {
+    "booking-worker": {
       "type": "application",
-      "root": "apps/booking",
+      "root": "apps/booking-worker",
       "entryFile": "main",
-      "sourceRoot": "apps/booking/src",
+      "sourceRoot": "apps/booking-worker/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/booking/tsconfig.app.json"
+        "tsConfigPath": "apps/booking-worker/tsconfig.app.json"
       }
     },
-    "project": {
+    "booking-api": {
       "type": "application",
-      "root": "apps/api",
+      "root": "apps/booking-api",
       "entryFile": "main",
-      "sourceRoot": "apps/api/src",
+      "sourceRoot": "apps/booking-api/src",
       "compilerOptions": {
         "assets": ["./migrations/*.{ts,js}"],
-        "tsConfigPath": "apps/api/tsconfig.app.json"
+        "tsConfigPath": "apps/booking-api/tsconfig.app.json"
       }
     }
   }

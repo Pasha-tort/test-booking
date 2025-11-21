@@ -43,3 +43,6 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - kafka_data:/var/lib/kafka/data
+
+volumes:
+  kafka_data:

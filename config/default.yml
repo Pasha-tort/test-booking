@@ -1,5 +1,5 @@
 microservices:
-  booking-api:
+  bookingApi:
     url: 'http://localhost:3001'
     port: '3001'
     swaggerEnable: true
@@ -14,7 +14,7 @@ microservices:
       clientId: booking-api
       brokers: ['localhost:9092']
 
-  booking-worker:
+  bookingWorker:
     url: 'http://localhost:3002'
     port: '3002'
     database:

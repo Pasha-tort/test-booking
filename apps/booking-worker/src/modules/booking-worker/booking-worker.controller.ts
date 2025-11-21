@@ -1,7 +1,9 @@
 import { KafkaSubscribe } from '@libs/kafka';
+import { Controller } from '@nestjs/common';
 import { EachMessagePayload } from 'kafkajs';
 
-export class BookingControllerKafka {
+@Controller()
+export class BookingWorkerController {
   @KafkaSubscribe('booking-created')
   async handleBookingCreated({ message }: EachMessagePayload) {
     const event = JSON.parse(message.value.toString());

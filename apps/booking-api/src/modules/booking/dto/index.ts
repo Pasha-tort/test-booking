@@ -1,3 +1,4 @@
+import { BookingStatusEnum } from '@libs/shared';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsInt, IsUUID } from 'class-validator';
@@ -20,6 +21,26 @@ export namespace ApiBookingDto {
     }
     export class CreateBookingResponseDto {
       bookingId: string;
+    }
+  }
+
+  export namespace getBookingById {
+    export class GetBookingByIdResponseDto {
+      @ApiProperty()
+      bookingId: string;
+
+      @ApiProperty()
+      restaurantId: string;
+
+      @ApiProperty({ type: Number })
+      guestCount: number;
+
+      @ApiProperty({ type: Date })
+      @Type(() => Date)
+      date: Date;
+
+      @ApiProperty({ enum: BookingStatusEnum })
+      status: BookingStatusEnum;
     }
   }
 }

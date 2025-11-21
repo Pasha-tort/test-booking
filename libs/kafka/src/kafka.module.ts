@@ -1,10 +1,11 @@
 import { DiscoveryModule, Reflector } from '@nestjs/core';
 import { Kafka } from 'kafkajs';
-import { KAFKA_CONSUMERS, KAFKA_PRODUCER, KAFKA_PROGRAM } from './constants';
+import { KAFKA_PROGRAM } from './constants';
 import { KafkaService } from './kafka.service';
 import { KafkaConsumerService } from './kafka-consumer.service';
-import { appConfig, MicroservicesConfig } from '@libs/configuration';
+import { DynamicModule, Module } from '@nestjs/common';
 
+@Module({})
 export class KafkaModule {
   static forRoot({
     clientId,
@@ -12,16 +13,17 @@ export class KafkaModule {
   }: {
     clientId: string;
     brokers: string[];
-  }) {
+  }): DynamicModule {
     if (!brokers.length)
       throw new Error('The number of brokers cannot be zero');
+
     return {
       module: KafkaModule,
       imports: [DiscoveryModule],
       providers: [
         {
           provide: KAFKA_PROGRAM,
-          useClass: new Kafka({
+          useValue: new Kafka({
             clientId,
             brokers,
           }),

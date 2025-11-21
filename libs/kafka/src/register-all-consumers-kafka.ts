@@ -13,25 +13,6 @@ export function registerAllConsumersKafka(
   const modules = (app as any).container.getModules();
 
   for (const module of modules.values()) {
-    // for (const provider of module.providers.values()) {
-    //   const instance = provider.instance;
-    //   if (!instance) continue;
-
-    //   const prototype = Object.getPrototypeOf(instance);
-    //   for (const methodName of Object.getOwnPropertyNames(prototype)) {
-    //     const method = prototype[methodName];
-    //     if (!method) continue;
-
-    //     const topic = reflector.get<string>(KAFKA_SUBSCRIBER, method);
-    //     if (topic) {
-    //       kafkaConsumerService.registerConsumer(
-    //         topic,
-    //         `group-${topic}`,
-    //         method.bind(instance),
-    //       );
-    //     }
-    //   }
-    // }
     searchSubscriberAndRegisterConsumer(
       module.providers.values(),
       reflector,
@@ -42,25 +23,6 @@ export function registerAllConsumersKafka(
       reflector,
       kafkaConsumerService,
     );
-    // for (const controller of module.controllers.values()) {
-    //   const instance = controller.instance;
-    //   if (!instance) continue;
-
-    //   const prototype = Object.getPrototypeOf(instance);
-    //   for (const methodName of Object.getOwnPropertyNames(prototype)) {
-    //     const method = prototype[methodName];
-    //     if (!method) continue;
-
-    //     const topic = reflector.get<string>(KAFKA_SUBSCRIBER, method);
-    //     if (topic) {
-    //       kafkaConsumerService.registerConsumer(
-    //         topic,
-    //         `group-${topic}`,
-    //         method.bind(instance),
-    //       );
-    //     }
-    //   }
-    // }
   }
 }
 
@@ -75,17 +37,19 @@ function searchSubscriberAndRegisterConsumer(
 
     const prototype = Object.getPrototypeOf(instance);
     for (const methodName of Object.getOwnPropertyNames(prototype)) {
-      const method = prototype[methodName];
-      if (!method) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
+      if (!descriptor) continue;
 
-      const { topic, groupId } = reflector.get<Subscriber>(
-        KAFKA_SUBSCRIBER,
-        method,
-      );
-      if (topic) {
+      if (descriptor.get || descriptor.set) continue;
+
+      const method = descriptor.value;
+      if (!method || typeof method !== 'function') continue;
+
+      const subscriber = reflector.get<Subscriber>(KAFKA_SUBSCRIBER, method);
+      if (subscriber?.topic) {
         kafkaConsumerService.registerConsumer(
-          topic,
-          `group-${groupId ? groupId : topic}`,
+          subscriber.topic,
+          `group-${subscriber.groupId ? subscriber.groupId : subscriber.topic}`,
           method.bind(instance),
         );
       }

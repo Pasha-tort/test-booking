@@ -31,11 +31,12 @@ export class KafkaConsumerService implements OnModuleInit {
     for (const [topic, { groupId, handler }] of this.consumers.entries()) {
       const consumer = this.kafka.consumer({ groupId });
       await consumer.connect();
-      await consumer.subscribe({ topic, fromBeginning: false });
+      await consumer.subscribe({ topic, fromBeginning: true });
 
       await consumer.run({
         autoCommit: false,
         eachMessage: async payload => {
+          console.log(payload);
           try {
             await handler(payload);
             await consumer.commitOffsets([
@@ -52,7 +53,7 @@ export class KafkaConsumerService implements OnModuleInit {
       });
 
       this.logger.log(
-        `[Kafka] Consumer started — topic=${topic}, group=${groupId}`,
+        `[Kafka] Consumer started - topic=${topic}, group=${groupId}`,
       );
     }
   }

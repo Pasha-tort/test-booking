@@ -1,9 +1,9 @@
 import { MicroservicesConfig } from '@libs/configuration';
 import { getDataSourceOptions } from '@libs/database';
-import { BookingEntity } from './modules';
+import { BookingEntity } from '@libs/database';
 
 const dataSourceObj = getDataSourceOptions(
-  MicroservicesConfig.bookingApi.database,
+  MicroservicesConfig.bookingWorker.database,
   {
     entities: [BookingEntity],
   },
