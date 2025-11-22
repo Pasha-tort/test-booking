@@ -1,12 +1,14 @@
 import { KafkaSubscribe } from '@libs/kafka';
+import { BookingApiTransportDto } from '@libs/shared';
 import { Controller } from '@nestjs/common';
 import { EachMessagePayload } from 'kafkajs';
 
 @Controller()
 export class BookingWorkerController {
-  @KafkaSubscribe('booking-created')
-  async handleBookingCreated({ message }: EachMessagePayload) {
-    const event = JSON.parse(message.value.toString());
-    console.log('[Booking] Event received:', event);
+  @KafkaSubscribe('booking.created')
+  async handleBookingCreated(
+    message: BookingApiTransportDto.createdBooking.EventDto,
+  ) {
+    console.log(message);
   }
 }

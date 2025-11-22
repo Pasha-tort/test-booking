@@ -3,6 +3,23 @@ import { BookingRepository } from './repositories/booking.repositories';
 import { ApiBookingDto } from './dto';
 import { KafkaService } from '@libs/kafka';
 import { BookingApiTransportDto } from '@libs/shared';
+import { Queue } from 'bullmq';
+
+const queue = new Queue('outbox', {
+  defaultJobOptions: {
+    removeOnComplete: true,
+    removeOnFail: false, // сохраняем упавшие job для анализа
+    attempts: 5, // retry
+    backoff: { type: 'exponential', delay: 500 },
+  },
+});
+
+const stuckJobs = await queue.addBulk(['active', 'delayed']);
+for (const job of stuckJobs) {
+  job.re;
+  // Можно повторно добавить job с тем же payload
+  // или вызвать job.retry() для восстановления
+}
 
 @Injectable()
 export class BookingService {

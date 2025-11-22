@@ -1,12 +1,14 @@
-import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
-import { Kafka, EachMessagePayload } from 'kafkajs';
+import { Injectable, OnModuleInit, Inject, Logger, Type } from '@nestjs/common';
+import { Kafka } from 'kafkajs';
 import { KAFKA_PROGRAM } from './constants';
+import { plainToInstance } from 'class-transformer';
 
-type ConsumerCallback = (payload: EachMessagePayload) => Promise<void>;
+type ConsumerCallback = (payload: any) => Promise<void>;
 type ConsumerConfig = {
   topic: string;
   groupId: string;
   handler: ConsumerCallback;
+  dto?: Type;
 };
 
 @Injectable()
@@ -19,36 +21,46 @@ export class KafkaConsumerService implements OnModuleInit {
     private readonly kafka: Kafka,
   ) {}
 
-  registerConsumer(topic: string, groupId: string, handler: ConsumerCallback) {
+  registerConsumer(
+    topic: string,
+    groupId: string,
+    handler: ConsumerCallback,
+    dto?: Type,
+  ) {
     if (this.consumers.has(topic))
       this.logger.warn(
         `[Kafka] Consumer for topic ${topic} already registered`,
       );
-    this.consumers.set(topic, { topic, groupId, handler });
+    this.consumers.set(topic, { topic, groupId, handler, dto });
   }
 
   async onModuleInit() {
-    for (const [topic, { groupId, handler }] of this.consumers.entries()) {
+    for (const [topic, { groupId, handler, dto }] of this.consumers.entries()) {
       const consumer = this.kafka.consumer({ groupId });
       await consumer.connect();
       await consumer.subscribe({ topic, fromBeginning: true });
 
       await consumer.run({
         autoCommit: false,
-        eachMessage: async payload => {
-          console.log(payload);
-          try {
-            await handler(payload);
-            await consumer.commitOffsets([
-              {
-                topic: payload.topic,
-                partition: payload.partition,
-                offset: (Number(payload.message.offset) + 1).toString(),
-              },
-            ]);
-          } catch (err) {
-            this.logger.error(`[Kafka] Error processing ${topic}`, err);
+        eachBatch: async ({
+          batch,
+          resolveOffset,
+          commitOffsetsIfNecessary,
+        }) => {
+          for (const message of batch.messages) {
+            const plain = JSON.parse(message.value.toString());
+            try {
+              const payload = dto ? plainToInstance(dto, plain) : plain;
+              await handler(payload);
+            } catch (err) {
+              this.logger.error('[Kafka] error in event processing');
+              this.logger.error(err);
+              return;
+            }
+            resolveOffset(message.offset);
           }
+
+          await commitOffsetsIfNecessary();
         },
       });
 

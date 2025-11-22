@@ -47,10 +47,16 @@ function searchSubscriberAndRegisterConsumer(
 
       const subscriber = reflector.get<Subscriber>(KAFKA_SUBSCRIBER, method);
       if (subscriber?.topic) {
+        const [dto] = Reflect.getMetadata(
+          'design:paramtypes',
+          prototype,
+          methodName,
+        );
         kafkaConsumerService.registerConsumer(
           subscriber.topic,
           `group-${subscriber.groupId ? subscriber.groupId : subscriber.topic}`,
           method.bind(instance),
+          dto,
         );
       }
     }
