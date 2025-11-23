@@ -10,33 +10,6 @@
   },
   "monorepo": true,
   "projects": {
-    "bootstrap": {
-      "type": "library",
-      "root": "libs/bootstrap",
-      "entryFile": "index",
-      "sourceRoot": "libs/bootstrap/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/bootstrap/tsconfig.lib.json"
-      }
-    },
-    "configuration": {
-      "type": "library",
-      "root": "libs/configuration",
-      "entryFile": "index",
-      "sourceRoot": "libs/configuration/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/configuration/tsconfig.lib.json"
-      }
-    },
-    "common": {
-      "type": "library",
-      "root": "libs/common",
-      "entryFile": "index",
-      "sourceRoot": "libs/common/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/common/tsconfig.lib.json"
-      }
-    },
     "booking-worker": {
       "type": "application",
       "root": "apps/booking-worker",

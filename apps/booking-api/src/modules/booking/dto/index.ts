@@ -20,6 +20,7 @@ export namespace ApiBookingDto {
       date: Date;
     }
     export class CreateBookingResponseDto {
+      @ApiProperty()
       bookingId: string;
     }
   }
@@ -34,6 +35,9 @@ export namespace ApiBookingDto {
 
       @ApiProperty({ type: Number })
       guestCount: number;
+
+      @ApiProperty({ type: Number })
+      sequenceNumber: number;
 
       @ApiProperty({ type: Date })
       @Type(() => Date)

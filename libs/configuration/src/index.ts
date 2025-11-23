@@ -1,2 +1,2 @@
 export * from './microservices.config';
-// export * from './app.config';
+export * from './queue.config';

@@ -42,25 +42,28 @@ export class KafkaConsumerService implements OnModuleInit {
 
       await consumer.run({
         autoCommit: false,
-        eachBatch: async ({
-          batch,
-          resolveOffset,
-          commitOffsetsIfNecessary,
-        }) => {
+        eachBatchAutoResolve: false,
+        eachBatch: async ({ batch, resolveOffset, heartbeat }) => {
           for (const message of batch.messages) {
             const plain = JSON.parse(message.value.toString());
             try {
-              const payload = dto ? plainToInstance(dto, plain) : plain;
-              await handler(payload);
+              await handler(dto ? plainToInstance(dto, plain) : plain);
             } catch (err) {
               this.logger.error('[Kafka] error in event processing');
               this.logger.error(err);
               return;
             }
             resolveOffset(message.offset);
+            await heartbeat();
           }
 
-          await commitOffsetsIfNecessary();
+          await consumer.commitOffsets([
+            {
+              topic: batch.topic,
+              partition: batch.partition,
+              offset: (Number(batch.lastOffset()) + 1).toString(),
+            },
+          ]);
         },
       });
 

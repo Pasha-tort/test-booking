@@ -30,6 +30,8 @@
       "@libs/kafka/*": ["libs/kafka/src/*"],
       "@libs/database": ["libs/database/src"],
       "@libs/database/*": ["libs/database/src/*"],
+      "@libs/queue": ["libs/queue/src"],
+      "@libs/queue/*": ["libs/queue/src/*"],
       "@libs/shared": ["libs/shared/src"],
       "@libs/shared/*": ["libs/shared/src/*"]
     }

@@ -1,9 +1,10 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiBookingDto } from './dto';
 import { BookingService } from './booking.service';
 import { plainToInstance } from 'class-transformer';
 
+@ApiTags('bookings')
 @Controller('bookings')
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
@@ -21,7 +22,7 @@ export class BookingController {
   }
 
   @ApiResponse({ type: ApiBookingDto.getBookingById.GetBookingByIdResponseDto })
-  @Get(':/bookingId')
+  @Get(':bookingId')
   async getBooking(@Param('bookingId') bookingId: string) {
     const booking = await this.bookingService.getBookingById(bookingId);
     return plainToInstance(

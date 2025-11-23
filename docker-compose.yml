@@ -39,10 +39,27 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - kafka_data:/var/lib/kafka/data
+
+  queue-redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - ./volumes/redis:/data:rw,z
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+    command: ["redis-server", "--requirepass", "y.7uH,DB8Rgt;(>FQE?KxL"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "y.7uH,DB8Rgt;(>FQE?KxL", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
 volumes:
   kafka_data:

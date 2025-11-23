@@ -1,41 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BookingRepository } from './repositories/booking.repositories';
 import { ApiBookingDto } from './dto';
-import { KafkaService } from '@libs/kafka';
-import { BookingApiTransportDto } from '@libs/shared';
-import { Queue } from 'bullmq';
-
-const queue = new Queue('outbox', {
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false, // сохраняем упавшие job для анализа
-    attempts: 5, // retry
-    backoff: { type: 'exponential', delay: 500 },
-  },
-});
-
-const stuckJobs = await queue.addBulk(['active', 'delayed']);
-for (const job of stuckJobs) {
-  job.re;
-  // Можно повторно добавить job с тем же payload
-  // или вызвать job.retry() для восстановления
-}
+import { DataSource } from 'typeorm';
+import { BookingEntity, RestaurantEntity } from '@libs/database';
+import { TypeOutBoxEventEnum } from '../outbox';
+import { OutBoxEntity } from '../../entities';
+import { OutBoxService } from '../outbox/outbox.service';
 
 @Injectable()
 export class BookingService {
   constructor(
     private readonly bookingRepository: BookingRepository,
-    private readonly kafkaService: KafkaService,
+    private readonly dataSource: DataSource,
+    private readonly outBoxService: OutBoxService,
   ) {}
 
   async createBooking(
     bookingData: ApiBookingDto.createBooking.CreateBookingRequestDto,
   ) {
-    const booking = await this.bookingRepository.createBooking(bookingData);
-    await this.kafkaService.publishMessage<BookingApiTransportDto.createdBooking.EventDto>(
-      BookingApiTransportDto.createdBooking.topic,
-      { key: booking.id, payload: { bookingId: booking.id } },
-    );
+    const { booking, event } = await this.dataSource.transaction(async em => {
+      const restaurant = await em.findOneBy(RestaurantEntity, {
+        id: bookingData.restaurantId,
+      });
+      if (!restaurant) throw new NotFoundException('Restaurant not found');
+      const booking = await em.save(
+        em.create(BookingEntity, { ...bookingData, restaurant }),
+      );
+      const eventId = booking.id;
+      const event = await em.save(
+        OutBoxEntity,
+        em.create(OutBoxEntity, {
+          id: eventId,
+          payload: { bookingId: booking.id },
+          eventType: TypeOutBoxEventEnum.BOOKING_CREATED,
+        }),
+      );
+      return { booking, event };
+    });
+
+    await this.outBoxService.createJob({
+      eventId: event.id,
+      eventType: TypeOutBoxEventEnum.BOOKING_CREATED,
+      payload: event.payload,
+    });
+
     return { bookingId: booking.id };
   }
 
